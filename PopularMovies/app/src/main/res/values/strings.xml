@@ -1,0 +1,36 @@
+<resources>
+    <string name="app_name">Popular Movies</string>
+
+    <!-- Menu -->
+    <string name="sort_menu">Sort</string>
+
+    <!-- MainActivity -->
+    <string name="connection_error">Your device is not connected to the Internet, please connect and try again</string>
+    <string name="no_movies_found_error">No movies were retrieved, please try again</string>
+    <string name="sort_by">Sort by</string>
+    <string name="popularity">Popularity</string>
+    <string name="rating">Rating</string>
+    <string name="image_content_description">The image will display a movie poster for a specific movie</string>
+
+    <string-array name="sort_methods">
+        <item>@string/popularity</item>
+        <item>@string/rating</item>
+    </string-array>
+
+    <!-- MovieActivity -->
+    <string name="no_movie_found_error">The data for this movie could not be retrieved, please try again</string>
+    <string name="not_available">N/A</string>
+    <string name="movie_runtime">Runtime:\n%s minutes</string>
+    <string name="movie_rating">Rating:\n%s/10</string>
+    <string name="movie_release_date">Release Date:\n%s</string>
+    <string name="movie_overview">Overview:\n%s</string>
+    <string name="movie_runtime_not_available">Runtime: \nN/A</string>
+    <string name="movie_rating_not_available">Rating: \nN/A</string>
+    <string name="movie">Movie</string>
+
+    <!-- Extras -->
+    <string name="EXTRA_MOVIE_ID">com.matthewsyren.popularmovies.extra.MOVIE_ID</string>
+
+    <!-- API Key -->
+    <string name="API_KEY">YOUR_API_KEY_HERE</string>
+</resources>
