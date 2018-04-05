@@ -10,11 +10,15 @@
     <string name="sort_by">Sort by</string>
     <string name="popularity">Popularity</string>
     <string name="rating">Rating</string>
+    <string name="favourites">Favourites</string>
     <string name="image_content_description">The image will display a movie poster for a specific movie</string>
+    <string name="refresh">Refresh</string>
+    <string name="no_favourites_added">You have not added any favourites yet</string>
 
     <string-array name="sort_methods">
         <item>@string/popularity</item>
         <item>@string/rating</item>
+        <item>@string/favourites</item>
     </string-array>
 
     <!-- MovieActivity -->
@@ -27,6 +31,10 @@
     <string name="movie_runtime_not_available">Runtime: \nN/A</string>
     <string name="movie_rating_not_available">Rating: \nN/A</string>
     <string name="movie">Movie</string>
+    <string name="image_favourite_description">This button will allow the user to add the movie to their favourites</string>
+    <string name="movie_added_to_favourites">Movie added to favourites</string>
+    <string name="movie_removed_from_favourites">Movie removed from favourites</string>
+    <string name="favourite_error_message">An error occurred, please try again</string>
 
     <!-- Extras -->
     <string name="EXTRA_MOVIE_ID">com.matthewsyren.popularmovies.extra.MOVIE_ID</string>

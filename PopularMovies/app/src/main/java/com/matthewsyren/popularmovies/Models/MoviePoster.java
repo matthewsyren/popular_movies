@@ -5,15 +5,15 @@ package com.matthewsyren.popularmovies.Models;
  */
 
 public class MoviePoster {
-    private final int id;
+    private final String id;
     private final String posterURL;
 
-    public MoviePoster(int id, String posterURL) {
+    public MoviePoster(String id, String posterURL) {
         this.id = id;
         this.posterURL = posterURL;
     }
 
-    public int getId() {
+    public String getId() {
         return id;
     }
 

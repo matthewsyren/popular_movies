@@ -5,6 +5,7 @@ package com.matthewsyren.popularmovies.Models;
  */
 
 public class Movie {
+    private final String id;
     private final String title;
     private final String posterURL;
     private final String overview;
@@ -13,7 +14,8 @@ public class Movie {
     private final String runtime;
 
     //Constructor
-    public Movie(String title, String posterURL, String overview, String userRating, String releaseDate, String runtime) {
+    public Movie(String id, String title, String posterURL, String overview, String userRating, String releaseDate, String runtime) {
+        this.id = id;
         this.title = title;
         this.posterURL = posterURL;
         this.overview = overview;
@@ -23,6 +25,11 @@ public class Movie {
     }
 
     //Getter methods
+
+    public String getId() {
+        return id;
+    }
+
     public String getTitle() {
         return title;
     }

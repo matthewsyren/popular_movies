@@ -3,9 +3,6 @@ package com.matthewsyren.popularmovies.Utilities;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.widget.Toast;
-
-import com.matthewsyren.popularmovies.R;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -51,7 +48,6 @@ public class NetworkUtilities {
                 return true;
             }
         }
-        Toast.makeText(context, context.getResources().getString(R.string.connection_error), Toast.LENGTH_LONG).show();
         return false;
     }
 }

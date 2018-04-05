@@ -27,6 +27,10 @@ public class JsonUtilities {
     private static final String QUERY_PARAMETER_API_KEY = "api_key";
     public static final String SORT_BY_POPULARITY = "popular";
     public static final String SORT_BY_RATING = "top_rated";
+    public static final String SORT_BY_FAVOURITES = "favourites";
+    private static final String PATH_VIDEO = "videos";
+    private static final String YOUTUBE_VIDEO_BASE_URL = "https://www.youtube.com/watch";
+    private static final String QUERY_PARAMETER_TRAILER_KEY = "v";
     private static final String MOVIE_POSTER_BASE_URL = "http://image.tmdb.org/t/p/w185/";
 
     //Creates a URL that can be used to fetch either the most popular or highest rated movies
@@ -46,12 +50,44 @@ public class JsonUtilities {
     }
 
     //Creates a URL that can be used to retrieve information about a specific movie
-    public static URL buildMovieURL(Context context, int movieID){
+    public static URL buildMovieURL(Context context, String movieID){
         try{
             Uri uri = Uri.parse(INDIVIDUAL_MOVIE_DB_BASE_URL)
                     .buildUpon()
-                    .appendPath(String.valueOf(movieID))
+                    .appendPath(movieID)
                     .appendQueryParameter(QUERY_PARAMETER_API_KEY, context.getResources().getString(R.string.API_KEY))
+                    .build();
+            return new URL(uri.toString());
+        }
+        catch(MalformedURLException m){
+            m.printStackTrace();
+        }
+        return null;
+    }
+
+    //Creates a URL that can be used to access the information about the trailers for the movie
+    public static URL buildTrailerRetrievalURL(Context context, String movieID){
+        try{
+            Uri uri = Uri.parse(MOVIE_DB_BASE_URL)
+                    .buildUpon()
+                    .appendPath(movieID)
+                    .appendPath(PATH_VIDEO)
+                    .appendQueryParameter(QUERY_PARAMETER_API_KEY, context.getResources().getString(R.string.API_KEY))
+                    .build();
+            return new URL(uri.toString());
+        }
+        catch(MalformedURLException m){
+            m.printStackTrace();
+        }
+        return null;
+    }
+
+    //Creates a URL that can be used to access the trailers for the movie
+    public static URL buildTrailerVideoURL(Context context, String trailerKey){
+        try{
+            Uri uri = Uri.parse(YOUTUBE_VIDEO_BASE_URL)
+                    .buildUpon()
+                    .appendQueryParameter(QUERY_PARAMETER_TRAILER_KEY, trailerKey)
                     .build();
             return new URL(uri.toString());
         }
@@ -70,7 +106,7 @@ public class JsonUtilities {
                 JSONArray moviesJSON = jsonObject.getJSONArray("results");
                 for(int i = 0; i < moviesJSON.length(); i++){
                     JSONObject movieJSON = moviesJSON.getJSONObject(i);
-                    int movieID = movieJSON.getInt("id");
+                    String movieID = movieJSON.getString("id");
                     String posterURL = MOVIE_POSTER_BASE_URL + movieJSON.getString("poster_path");
                     MoviePoster moviePoster = new MoviePoster(movieID, posterURL);
                     moviePosters.add(moviePoster);
@@ -88,13 +124,14 @@ public class JsonUtilities {
     public static Movie getMovieDetails(String json){
         try{
             JSONObject movieJSON = new JSONObject(json);
+            String id = movieJSON.getString("id");
             String title = movieJSON.getString("title");
             String overview = movieJSON.getString("overview");
             String releaseDate = movieJSON.getString("release_date");
             String runtime = movieJSON.getString("runtime");
             String posterURL = MOVIE_POSTER_BASE_URL + movieJSON.getString("poster_path");
             String rating = movieJSON.getString("vote_average");
-            return new Movie(title, posterURL, overview, rating, releaseDate, runtime);
+            return new Movie(id, title, posterURL, overview, rating, releaseDate, runtime);
         }
         catch(JSONException j){
             j.printStackTrace();

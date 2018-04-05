@@ -1,6 +1,7 @@
 package com.matthewsyren.popularmovies;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -23,10 +24,15 @@ import butterknife.ButterKnife;
 public class MoviePosterAdapter extends RecyclerView.Adapter<MoviePosterAdapter.MoviePosterViewHolder>{
     private final List<MoviePoster> mMoviePosters;
     private final RecyclerViewItemClickListener mItemClickListener;
+    private List<Bitmap> mBitmaps;
 
     MoviePosterAdapter(List<MoviePoster> moviePosters, RecyclerViewItemClickListener itemClickListener){
         mMoviePosters = moviePosters;
         mItemClickListener = itemClickListener;
+    }
+
+    void setBitmaps(List<Bitmap> bitmaps){
+        mBitmaps = bitmaps;
     }
 
     @Override
@@ -47,6 +53,10 @@ public class MoviePosterAdapter extends RecyclerView.Adapter<MoviePosterAdapter.
                     .fit()
                     .centerInside()
                     .into(holder.moviePoster);
+        }
+        else{
+            //Displays the Bitmaps retrieved from the SQLite database if there is no Internet connection
+            holder.moviePoster.setImageBitmap(mBitmaps.get(position));
         }
     }
 
