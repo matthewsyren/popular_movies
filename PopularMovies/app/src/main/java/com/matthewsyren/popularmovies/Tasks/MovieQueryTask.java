@@ -16,11 +16,12 @@ import java.net.URL;
  * Used to query the movie information
  */
 
-public class MovieQueryTask extends AsyncTask<URL, Void, Movie> {
+public class MovieQueryTask
+        extends AsyncTask<URL, Void, Movie> {
     private Context mContext;
-    private MovieQueryTaskOnCompleteListener mMovieQueryTaskOnCompleteListener;
+    private IMovieQueryTaskOnCompleteListener mMovieQueryTaskOnCompleteListener;
 
-    public MovieQueryTask(Context context, MovieQueryTaskOnCompleteListener movieQueryTaskOnCompleteListener){
+    public MovieQueryTask(Context context, IMovieQueryTaskOnCompleteListener movieQueryTaskOnCompleteListener){
         mContext = context;
         mMovieQueryTaskOnCompleteListener = movieQueryTaskOnCompleteListener;
     }
@@ -45,6 +46,6 @@ public class MovieQueryTask extends AsyncTask<URL, Void, Movie> {
     @Override
     protected void onPostExecute(Movie movie) {
         super.onPostExecute(movie);
-        mMovieQueryTaskOnCompleteListener.onTaskComplete(movie);
+        mMovieQueryTaskOnCompleteListener.onMovieQueryTaskComplete(movie);
     }
 }

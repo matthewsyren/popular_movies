@@ -1,4 +1,4 @@
-package com.matthewsyren.popularmovies;
+package com.matthewsyren.popularmovies.Adapters;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -10,6 +10,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 
 import com.matthewsyren.popularmovies.Models.MoviePoster;
+import com.matthewsyren.popularmovies.R;
 import com.squareup.picasso.Picasso;
 
 import java.util.List;
@@ -21,17 +22,18 @@ import butterknife.ButterKnife;
  * Used to display the movie posters in a GridLayout
  */
 
-public class MoviePosterAdapter extends RecyclerView.Adapter<MoviePosterAdapter.MoviePosterViewHolder>{
+public class MoviePosterAdapter
+        extends RecyclerView.Adapter<MoviePosterAdapter.MoviePosterViewHolder>{
     private final List<MoviePoster> mMoviePosters;
-    private final RecyclerViewItemClickListener mItemClickListener;
+    private final IRecyclerViewOnItemClickListener mItemClickListener;
     private List<Bitmap> mBitmaps;
 
-    MoviePosterAdapter(List<MoviePoster> moviePosters, RecyclerViewItemClickListener itemClickListener){
+    public MoviePosterAdapter(List<MoviePoster> moviePosters, IRecyclerViewOnItemClickListener itemClickListener){
         mMoviePosters = moviePosters;
         mItemClickListener = itemClickListener;
     }
 
-    void setBitmaps(List<Bitmap> bitmaps){
+    public void setBitmaps(List<Bitmap> bitmaps){
         mBitmaps = bitmaps;
     }
 
@@ -56,7 +58,9 @@ public class MoviePosterAdapter extends RecyclerView.Adapter<MoviePosterAdapter.
         }
         else{
             //Displays the Bitmaps retrieved from the SQLite database if there is no Internet connection
-            holder.moviePoster.setImageBitmap(mBitmaps.get(position));
+            if(mBitmaps != null){
+                holder.moviePoster.setImageBitmap(mBitmaps.get(position));
+            }
         }
     }
 
@@ -65,12 +69,13 @@ public class MoviePosterAdapter extends RecyclerView.Adapter<MoviePosterAdapter.
         return mMoviePosters.size();
     }
 
-    MoviePoster getItem(int position){
+    public MoviePoster getItem(int position){
         return mMoviePosters.get(position);
     }
 
-    class MoviePosterViewHolder extends RecyclerView.ViewHolder
-    implements View.OnClickListener{
+    class MoviePosterViewHolder
+            extends RecyclerView.ViewHolder
+            implements View.OnClickListener{
         @BindView(R.id.iv_movie_poster) ImageView moviePoster;
 
         MoviePosterViewHolder(View view){
@@ -83,9 +88,5 @@ public class MoviePosterAdapter extends RecyclerView.Adapter<MoviePosterAdapter.
         public void onClick(View view) {
             mItemClickListener.onItemClick(getAdapterPosition());
         }
-    }
-
-    public interface RecyclerViewItemClickListener{
-        void onItemClick(int positionClicked);
     }
 }

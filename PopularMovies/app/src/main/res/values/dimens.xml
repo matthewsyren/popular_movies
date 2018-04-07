@@ -3,8 +3,16 @@
     <dimen name="activity_horizontal_margin">16dp</dimen>
     <dimen name="activity_vertical_margin">16dp</dimen>
     <dimen name="progress_bar_size">60dp</dimen>
-    <dimen name="recycler_view_margin">5dp</dimen>
+
+    <!-- MainActivity -->
+    <dimen name="main_activity_recycler_view_margin">5dp</dimen>
+
+    <!-- MovieActivity -->
     <dimen name="movie_details_text_size">22sp</dimen>
     <dimen name="favourite_button_padding">6dp</dimen>
     <dimen name="movie_activity_view_margin_top">20dp</dimen>
+    <dimen name="play_trailer_image_size">60dp</dimen>
+    <dimen name="trailer_card_min_width">200dp</dimen>
+    <dimen name="trailer_card_margin">10dp</dimen>
+    <dimen name="trailer_title_padding">5dp</dimen>
 </resources>

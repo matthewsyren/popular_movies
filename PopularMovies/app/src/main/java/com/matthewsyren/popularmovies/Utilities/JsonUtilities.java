@@ -5,6 +5,7 @@ import android.net.Uri;
 
 import com.matthewsyren.popularmovies.Models.Movie;
 import com.matthewsyren.popularmovies.Models.MoviePoster;
+import com.matthewsyren.popularmovies.Models.MovieReview;
 import com.matthewsyren.popularmovies.R;
 
 import org.json.JSONArray;
@@ -14,7 +15,6 @@ import org.json.JSONObject;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Used to parse JSON that is retrieved from the Movies DB API
@@ -29,6 +29,7 @@ public class JsonUtilities {
     public static final String SORT_BY_RATING = "top_rated";
     public static final String SORT_BY_FAVOURITES = "favourites";
     private static final String PATH_VIDEO = "videos";
+    private static final String PATH_REVIEWS = "reviews";
     private static final String YOUTUBE_VIDEO_BASE_URL = "https://www.youtube.com/watch";
     private static final String QUERY_PARAMETER_TRAILER_KEY = "v";
     private static final String MOVIE_POSTER_BASE_URL = "http://image.tmdb.org/t/p/w185/";
@@ -50,11 +51,11 @@ public class JsonUtilities {
     }
 
     //Creates a URL that can be used to retrieve information about a specific movie
-    public static URL buildMovieURL(Context context, String movieID){
+    public static URL buildMovieUrl(Context context, String movieId){
         try{
             Uri uri = Uri.parse(INDIVIDUAL_MOVIE_DB_BASE_URL)
                     .buildUpon()
-                    .appendPath(movieID)
+                    .appendPath(movieId)
                     .appendQueryParameter(QUERY_PARAMETER_API_KEY, context.getResources().getString(R.string.API_KEY))
                     .build();
             return new URL(uri.toString());
@@ -66,11 +67,11 @@ public class JsonUtilities {
     }
 
     //Creates a URL that can be used to access the information about the trailers for the movie
-    public static URL buildTrailerRetrievalURL(Context context, String movieID){
+    public static URL buildTrailerRetrievalUrl(Context context, String movieId){
         try{
             Uri uri = Uri.parse(MOVIE_DB_BASE_URL)
                     .buildUpon()
-                    .appendPath(movieID)
+                    .appendPath(movieId)
                     .appendPath(PATH_VIDEO)
                     .appendQueryParameter(QUERY_PARAMETER_API_KEY, context.getResources().getString(R.string.API_KEY))
                     .build();
@@ -83,7 +84,7 @@ public class JsonUtilities {
     }
 
     //Creates a URL that can be used to access the trailers for the movie
-    public static URL buildTrailerVideoURL(Context context, String trailerKey){
+    private static URL buildTrailerVideoUrl(String trailerKey){
         try{
             Uri uri = Uri.parse(YOUTUBE_VIDEO_BASE_URL)
                     .buildUpon()
@@ -97,9 +98,46 @@ public class JsonUtilities {
         return null;
     }
 
-    //Parses the JSON retrieved from the API and returns a list of the data about the movie posters for the movies
-    public static List<MoviePoster> getMoviePosters(String json){
-        List<MoviePoster> moviePosters = new ArrayList<>();
+    //Creates a URL that can be used to fetch the reviews for a movie
+    public static URL buildReviewUrl(Context context, String movieId){
+        try{
+            Uri uri = Uri.parse(MOVIE_DB_BASE_URL)
+                    .buildUpon()
+                    .appendPath(movieId)
+                    .appendPath(PATH_REVIEWS)
+                    .appendQueryParameter(QUERY_PARAMETER_API_KEY, context.getResources().getString(R.string.API_KEY))
+                    .build();
+            return new URL(uri.toString());
+        }
+        catch(MalformedURLException m){
+            m.printStackTrace();
+        }
+        return null;
+    }
+
+    //Parses the JSON retrieved from the API and returns an ArrayList of URLs that point to the trailers for a specific movie
+    public static ArrayList<URL> getMovieTrailerUrls(String json){
+        ArrayList<URL> urls = new ArrayList<>();
+        try{
+            JSONObject jsonObject = new JSONObject(json);
+            JSONArray jsonArray = jsonObject.getJSONArray("results");
+            for(int i = 0; i < jsonArray.length(); i++){
+                JSONObject trailer = jsonArray.getJSONObject(i);
+                URL url = buildTrailerVideoUrl(trailer.getString("key"));
+                if(url != null){
+                    urls.add(url);
+                }
+            }
+        }
+        catch(JSONException j){
+            j.printStackTrace();
+        }
+        return urls;
+    }
+
+    //Parses the JSON retrieved from the API and returns an ArrayList of the data about the movie posters for the movies
+    public static ArrayList<MoviePoster> getMoviePosters(String json){
+        ArrayList<MoviePoster> moviePosters = new ArrayList<>();
         if(json != null){
             try{
                 JSONObject jsonObject = new JSONObject(json);
@@ -112,6 +150,29 @@ public class JsonUtilities {
                     moviePosters.add(moviePoster);
                 }
                 return moviePosters;
+            }
+            catch(JSONException j){
+                j.printStackTrace();
+            }
+        }
+        return null;
+    }
+
+    //Parses the JSON retrieved from the API and returns an ArrayList of MovieReview objects
+    public static ArrayList<MovieReview> getMovieReviews(String json){
+        ArrayList<MovieReview> movieReviews = new ArrayList<>();
+        if(json != null){
+            try{
+                JSONObject jsonObject = new JSONObject(json);
+                JSONArray reviews = jsonObject.getJSONArray("results");
+                for(int i = 0; i < reviews.length(); i++){
+                    JSONObject movieJSON = reviews.getJSONObject(i);
+                    String author = movieJSON.getString("author");
+                    String content = movieJSON.getString("content");
+                    MovieReview movieReview = new MovieReview(author, content);
+                    movieReviews.add(movieReview);
+                }
+                return movieReviews;
             }
             catch(JSONException j){
                 j.printStackTrace();

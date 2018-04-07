@@ -15,6 +15,13 @@
         <item name="android:layout_marginTop">@dimen/movie_activity_view_margin_top</item>
     </style>
 
+    <style name="MovieInformationLabel">
+        <item name="android:textColor">@color/colorBlack</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textSize">@dimen/movie_details_text_size</item>
+        <item name="android:layout_marginTop">@dimen/movie_activity_view_margin_top</item>
+    </style>
+
     <style name="AppTheme.NoActionBar">
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>

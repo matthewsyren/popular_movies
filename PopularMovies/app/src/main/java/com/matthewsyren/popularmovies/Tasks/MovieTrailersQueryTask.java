@@ -4,34 +4,34 @@ import android.content.Context;
 import android.os.AsyncTask;
 import android.widget.Toast;
 
-import com.matthewsyren.popularmovies.Models.MoviePoster;
 import com.matthewsyren.popularmovies.R;
 import com.matthewsyren.popularmovies.Utilities.JsonUtilities;
 import com.matthewsyren.popularmovies.Utilities.NetworkUtilities;
 
 import java.io.IOException;
 import java.net.URL;
-import java.util.List;
+import java.util.ArrayList;
 
 /**
- * Used to query the movie posters for the appropriate movies
+ * Used to fetch a list of URLs pointing to the trailers for a specific movie
  */
 
-public class MovieImagesQueryTask extends AsyncTask<URL, Void, List<MoviePoster>> {
+public class MovieTrailersQueryTask
+        extends AsyncTask<URL, Void, ArrayList<URL>>{
     private Context mContext;
-    private MovieImagesQueryTaskOnCompleteListener mMovieImagesQueryTaskOnCompleteListener;
+    private IMovieTrailersQueryTaskOnCompleteListener mMovieTrailersQueryTask;
 
-    public MovieImagesQueryTask(Context context, MovieImagesQueryTaskOnCompleteListener movieImagesQueryTaskOnCompleteListener){
+    public MovieTrailersQueryTask(Context context, IMovieTrailersQueryTaskOnCompleteListener movieTrailersQueryTask){
         mContext = context;
-        mMovieImagesQueryTaskOnCompleteListener = movieImagesQueryTaskOnCompleteListener;
+        mMovieTrailersQueryTask = movieTrailersQueryTask;
     }
 
     @Override
-    protected List<MoviePoster> doInBackground(URL... urls) {
+    protected ArrayList<URL> doInBackground(URL... urls) {
         try{
             String response = NetworkUtilities.getHttpResponse(urls[0]);
             if(response != null && !response.equals("")){
-                return  JsonUtilities.getMoviePosters(response);
+                return  JsonUtilities.getMovieTrailerUrls(response);
             }
             else{
                 Toast.makeText(mContext, mContext.getResources().getString(R.string.no_movies_found_error), Toast.LENGTH_LONG).show();
@@ -44,8 +44,8 @@ public class MovieImagesQueryTask extends AsyncTask<URL, Void, List<MoviePoster>
     }
 
     @Override
-    protected void onPostExecute(List<MoviePoster> moviePosters) {
-        super.onPostExecute(moviePosters);
-        mMovieImagesQueryTaskOnCompleteListener.onTaskComplete(moviePosters);
+    protected void onPostExecute(ArrayList<URL> trailers) {
+        super.onPostExecute(trailers);
+        mMovieTrailersQueryTask.onMovieTrailerQueryTaskComplete(trailers);
     }
 }

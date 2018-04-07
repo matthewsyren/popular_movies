@@ -1,5 +1,6 @@
 package com.matthewsyren.popularmovies;
 
+import android.content.ActivityNotFoundException;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Intent;
@@ -16,6 +17,9 @@ import android.support.v4.content.ContextCompat;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageButton;
@@ -24,17 +28,27 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.matthewsyren.popularmovies.Adapters.IRecyclerViewOnItemClickListener;
+import com.matthewsyren.popularmovies.Adapters.MovieTrailerAdapter;
 import com.matthewsyren.popularmovies.Data.MovieContract;
 import com.matthewsyren.popularmovies.Data.MovieContract.MovieEntry;
 import com.matthewsyren.popularmovies.Models.Movie;
+import com.matthewsyren.popularmovies.Models.MovieReview;
+import com.matthewsyren.popularmovies.Tasks.IMovieQueryTaskOnCompleteListener;
+import com.matthewsyren.popularmovies.Tasks.IMovieReviewsQueryTaskOnCompleteListener;
+import com.matthewsyren.popularmovies.Tasks.IMovieTrailersQueryTaskOnCompleteListener;
 import com.matthewsyren.popularmovies.Tasks.MovieQueryTask;
-import com.matthewsyren.popularmovies.Tasks.MovieQueryTaskOnCompleteListener;
+import com.matthewsyren.popularmovies.Tasks.MovieReviewsQueryTask;
+import com.matthewsyren.popularmovies.Tasks.MovieTrailersQueryTask;
 import com.matthewsyren.popularmovies.Utilities.BitmapUtilities;
 import com.matthewsyren.popularmovies.Utilities.JsonUtilities;
 import com.matthewsyren.popularmovies.Utilities.NetworkUtilities;
 import com.squareup.picasso.Picasso;
 
+import java.io.Serializable;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -43,7 +57,15 @@ import butterknife.ButterKnife;
  * Used to display the details about the Movie that the user clicked on the MainActivity
  */
 
-public class MovieActivity extends AppCompatActivity implements MovieQueryTaskOnCompleteListener, LoaderManager.LoaderCallbacks<Cursor> {
+public class MovieActivity
+        extends AppCompatActivity
+        implements IMovieQueryTaskOnCompleteListener,
+        IMovieTrailersQueryTaskOnCompleteListener,
+        LoaderManager.LoaderCallbacks<Cursor>,
+        IRecyclerViewOnItemClickListener,
+        IMovieReviewsQueryTaskOnCompleteListener{
+
+    //View bindings
     @BindView(R.id.pb_movie_loading) ProgressBar mProgressBar;
     @BindView(R.id.tv_movie_title) TextView mMovieTitle;
     @BindView(R.id.tv_movie_overview) TextView mMovieOverview;
@@ -52,21 +74,42 @@ public class MovieActivity extends AppCompatActivity implements MovieQueryTaskOn
     @BindView(R.id.tv_movie_runtime) TextView mMovieRuntime;
     @BindView(R.id.iv_movie_poster) ImageView mMoviePoster;
     @BindView(R.id.ib_favourite) ImageButton mFavourite;
+    @BindView(R.id.rv_movie_trailers) RecyclerView mTrailersRecyclerView;
+    @BindView(R.id.tv_trailers) TextView mTrailersTitle;
+    @BindView(R.id.tv_reviews) TextView mReviews;
+    @BindView(R.id.tv_movie_overview_label) TextView mOverviewLabel;
+    @BindView(R.id.tv_reviews_label) TextView mReviewsLabel;
+
+    //Variables and constants
     private Movie mMovie;
     private String mMovieId;
+    private String mMovieReview = "";
+    private List<URL> mMovieTrailerUrls = new ArrayList<>();
+    private boolean mIsFavourite;
     private static final int FAVOURITE_LOADER_ID = 102;
     private static final int CHECK_IF_FAVOURITE_LOADER_ID = 103;
-    private boolean mIsFavourite;
+    private static final String MOVIE_BUNDLE_KEY = "movie_bundle";
+    private static final String MOVIE_REVIEW_BUNDLE_KEY = "movie_review_bundle";
+    private static final String MOVIE_TRAILER_BUNDLE_KEY = "movie_trailer_bundle";
+    private static final String IS_FAVOURITE_BUNDLE_KEY = "is_favourite";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_movie);
+
         ButterKnife.bind(this);
-        showProgressBar();
 
         Resources resources = getResources();
         Intent intent = getIntent();
+
+        if(savedInstanceState != null){
+            restoreData(savedInstanceState);
+        }
+        else{
+            mProgressBar.setVisibility(View.VISIBLE);
+            mFavourite.setVisibility(View.INVISIBLE);
+        }
 
         //Fetches the ID of the movie and uses that to fetch data about the movie
         if(intent.hasExtra(resources.getString(R.string.EXTRA_MOVIE_ID))) {
@@ -75,13 +118,75 @@ public class MovieActivity extends AppCompatActivity implements MovieQueryTaskOn
         }
     }
 
+    //Method fetches the savedInstanceStateData and uses the data to assign values to the appropriate variables
+    public void restoreData(Bundle savedInstanceState){
+        if(savedInstanceState.containsKey(MOVIE_BUNDLE_KEY)){
+            mMovie = savedInstanceState.getParcelable(MOVIE_BUNDLE_KEY);
+            displayMovieInformation(mMovie);
+        }
+
+        if(savedInstanceState.containsKey(MOVIE_REVIEW_BUNDLE_KEY)){
+            mMovieReview = savedInstanceState.getString(MOVIE_REVIEW_BUNDLE_KEY);
+            displayMovieReviews();
+        }
+
+        if(savedInstanceState.containsKey(MOVIE_TRAILER_BUNDLE_KEY)){
+            mMovieTrailerUrls = (ArrayList<URL>) savedInstanceState.getSerializable(MOVIE_TRAILER_BUNDLE_KEY);
+            displayTrailers(mMovieTrailerUrls);
+        }
+
+        if(savedInstanceState.containsKey(IS_FAVOURITE_BUNDLE_KEY)){
+            mIsFavourite = savedInstanceState.getBoolean(IS_FAVOURITE_BUNDLE_KEY);
+            setFavouriteButtonTint();
+        }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.share, menu);
+        return true;
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        //Caches the appropriate data
+        if(mMovie != null){
+            outState.putParcelable(MOVIE_BUNDLE_KEY, mMovie);
+        }
+
+        if(mMovieReview.length() != 0){
+            outState.putString(MOVIE_REVIEW_BUNDLE_KEY, mMovieReview);
+        }
+
+        if(mMovieTrailerUrls.size() != 0){
+            outState.putSerializable(MOVIE_TRAILER_BUNDLE_KEY, (Serializable) mMovieTrailerUrls);
+        }
+        outState.putBoolean(IS_FAVOURITE_BUNDLE_KEY, mIsFavourite);
+    }
+
     //Method fetches the movie's data from the online API, or from the SQLite database if there is no Internet connection and the movie has been added to favourites
     public void getMovieData(){
         if(NetworkUtilities.isOnline(this)){
-            //Fetches the data about the movie from the MovieDB API
-            URL url = JsonUtilities.buildMovieURL(this, mMovieId);
-            MovieQueryTask movieQueryTask = new MovieQueryTask(this, this);
-            movieQueryTask.execute(url);
+            //Fetches and displays the data about the selected movie that hasn't been cached already
+            if(mMovie == null){
+                URL url = JsonUtilities.buildMovieUrl(this, mMovieId);
+                MovieQueryTask movieQueryTask = new MovieQueryTask(this, this);
+                movieQueryTask.execute(url);
+            }
+
+            if(mMovieTrailerUrls.size() == 0){
+                URL trailerURL = JsonUtilities.buildTrailerRetrievalUrl(this, mMovieId);
+                MovieTrailersQueryTask movieTrailersQueryTask = new MovieTrailersQueryTask(this, this);
+                movieTrailersQueryTask.execute(trailerURL);
+            }
+
+            if(mMovieReview.length() == 0){
+                URL reviewUrl = JsonUtilities.buildReviewUrl(this, mMovieId);
+                MovieReviewsQueryTask movieReviewsQueryTask = new MovieReviewsQueryTask(this, this);
+                movieReviewsQueryTask.execute(reviewUrl);
+            }
         }
         else{
             if(mIsFavourite){
@@ -90,7 +195,7 @@ public class MovieActivity extends AppCompatActivity implements MovieQueryTaskOn
             }
             else{
                 Toast.makeText(getApplicationContext(), getResources().getString(R.string.connection_error), Toast.LENGTH_LONG).show();
-                hideProgressBar();
+                mProgressBar.setVisibility(View.INVISIBLE);
             }
         }
     }
@@ -103,20 +208,24 @@ public class MovieActivity extends AppCompatActivity implements MovieQueryTaskOn
             case android.R.id.home:
                 onBackPressed();
                 return true;
+            case R.id.mi_share:
+                shareTrailer();
+                return true;
         }
         return super.onOptionsItemSelected(item);
     }
 
-    //Displays the ProgressBar and hides the favourite button
-    public void showProgressBar(){
-        mProgressBar.setVisibility(View.VISIBLE);
-        mFavourite.setVisibility(View.INVISIBLE);
-    }
-
-    //Hides the ProgressBar and displays the favourite button
-    public void hideProgressBar(){
-        mProgressBar.setVisibility(View.INVISIBLE);
-        mFavourite.setVisibility(View.VISIBLE);
+    //Allows the user to share the first trailer for the selected movie
+    public void shareTrailer(){
+        if(mMovieTrailerUrls.size() >= 1){
+            Intent intent = new Intent(Intent.ACTION_SEND);
+            intent.setType("text/plain");
+            intent.putExtra(Intent.EXTRA_TEXT, mMovieTrailerUrls.get(0).toString());
+            startActivity(Intent.createChooser(intent, getString(R.string.share_trailer)));
+        }
+        else{
+            Toast.makeText(getApplicationContext(), getString(R.string.no_trailers_to_share), Toast.LENGTH_LONG).show();
+        }
     }
 
     //Method performs the appropriate action when the favourite button is clicked
@@ -166,7 +275,7 @@ public class MovieActivity extends AppCompatActivity implements MovieQueryTaskOn
 
         Uri newUri = contentResolver.insert(uri, contentValues);
 
-        //Displays the appropriate message based on whether the data was inserted
+        //Displays the appropriate message based on whether the data was inserted or not
         if(newUri != null){
             Toast.makeText(getApplicationContext(), getString(R.string.movie_added_to_favourites), Toast.LENGTH_LONG).show();
             mIsFavourite = true;
@@ -224,9 +333,10 @@ public class MovieActivity extends AppCompatActivity implements MovieQueryTaskOn
                     ? resources.getString(R.string.movie_rating_not_available)
                     : resources.getString(R.string.movie_rating, movie.getUserRating()));
 
-            mMovieOverview.setText(resources.getString(R.string.movie_overview, movie.getOverview() == null || movie.getOverview().equals("") || movie.getOverview().equals("null")
+            mMovieOverview.setText(movie.getOverview() == null || movie.getOverview().equals("") || movie.getOverview().equals("null")
                     ? resources.getString(R.string.not_available)
-                    : movie.getOverview()));
+                    : movie.getOverview());
+            mOverviewLabel.setVisibility(View.VISIBLE);
 
             mMovie = movie;
             setFavouriteButtonTint();
@@ -234,12 +344,13 @@ public class MovieActivity extends AppCompatActivity implements MovieQueryTaskOn
         else{
             Toast.makeText(getApplicationContext(), resources.getString(R.string.no_movie_found_error), Toast.LENGTH_LONG).show();
         }
-        hideProgressBar();
+        mProgressBar.setVisibility(View.INVISIBLE);
+        mFavourite.setVisibility(View.VISIBLE);
     }
 
     //Displays the movie's information
     @Override
-    public void onTaskComplete(Movie movie) {
+    public void onMovieQueryTaskComplete(Movie movie) {
         displayMovieInformation(movie);
     }
 
@@ -273,7 +384,7 @@ public class MovieActivity extends AppCompatActivity implements MovieQueryTaskOn
                         null
                 );
         }
-        throw new RuntimeException("Loader ID not recognised: " + id);
+        throw new RuntimeException(getString(R.string.loader_id_not_found, id));
     }
 
     @Override
@@ -284,12 +395,19 @@ public class MovieActivity extends AppCompatActivity implements MovieQueryTaskOn
         switch(id){
             case FAVOURITE_LOADER_ID:
                 parseCursorData(cursor);
+                getSupportLoaderManager().destroyLoader(FAVOURITE_LOADER_ID);
                 break;
             case CHECK_IF_FAVOURITE_LOADER_ID:
                 mIsFavourite = cursor.moveToFirst();
                 getMovieData();
+                getSupportLoaderManager().destroyLoader(CHECK_IF_FAVOURITE_LOADER_ID);
                 break;
         }
+    }
+
+    @Override
+    public void onLoaderReset(@NonNull Loader<Cursor> loader) {
+
     }
 
     //Parses the data from the Cursor and sends the data to be displayed
@@ -316,7 +434,54 @@ public class MovieActivity extends AppCompatActivity implements MovieQueryTaskOn
     }
 
     @Override
-    public void onLoaderReset(@NonNull Loader<Cursor> loader) {
+    public void onMovieTrailerQueryTaskComplete(ArrayList<URL> urls) {
+        //Displays the trailers
+        mMovieTrailerUrls = urls;
+        displayTrailers(urls);
+    }
 
+    //Displays a list of trailers for the movie
+    public void displayTrailers(List<URL> urls){
+        if(urls.size() > 0){
+            mTrailersTitle.setVisibility(View.VISIBLE);
+            MovieTrailerAdapter movieTrailerAdapter = new MovieTrailerAdapter(urls, this);
+            LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
+            linearLayoutManager.setOrientation(LinearLayoutManager.HORIZONTAL);
+            mTrailersRecyclerView.setLayoutManager(linearLayoutManager);
+            mTrailersRecyclerView.setAdapter(movieTrailerAdapter);
+            mTrailersTitle.setVisibility(View.VISIBLE);
+        }
+    }
+
+    @Override
+    public void onItemClick(int positionClicked) {
+        URL url = ((MovieTrailerAdapter)mTrailersRecyclerView.getAdapter()).getUrl(positionClicked);
+
+        //Opens an app that lets the user watch the trailer
+        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url.toString()));
+        try {
+            startActivity(Intent.createChooser(intent, getString(R.string.movie_trailer_intent_chooser)));
+        }
+        catch (ActivityNotFoundException ex) {
+            Toast.makeText(getApplicationContext(), getString(R.string.trailer_error), Toast.LENGTH_LONG).show();
+        }
+    }
+
+    @Override
+    public void onMovieReviewsQueryTaskComplete(ArrayList<MovieReview> reviews) {
+        //Adds all reviews into a String variable and displays it
+        for(MovieReview movieReview : reviews){
+            mMovieReview += getString(R.string.review_line, movieReview.getAuthor(), movieReview.getContent());
+        }
+        
+        if(mMovieReview.length() > 0){
+            displayMovieReviews();
+        }
+    }
+
+    //Displays the movie reviews fetched from the MovieDB API and displays them in a TextView
+    public void displayMovieReviews(){
+        mReviewsLabel.setVisibility(View.VISIBLE);
+        mReviews.setText(mMovieReview);
     }
 }

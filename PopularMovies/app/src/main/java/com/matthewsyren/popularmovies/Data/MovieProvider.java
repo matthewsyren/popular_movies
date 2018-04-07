@@ -9,12 +9,14 @@ import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import com.matthewsyren.popularmovies.Data.MovieContract.MovieEntry;
+import com.matthewsyren.popularmovies.R;
 
 /**
  * Used to provide a ContentProvider to the Movies SQLite database
  */
 
-public class MovieProvider extends ContentProvider{
+public class MovieProvider
+        extends ContentProvider{
     private UriMatcher mUriMatcher = buildUriMatcher();
     private MovieDbHelper mMovieDbHelper;
     private static final int CODE_MOVIES = 100;
@@ -52,7 +54,7 @@ public class MovieProvider extends ContentProvider{
                         );
                 break;
             default:
-                throw new UnsupportedOperationException("Uri not recognised: " + uri);
+                throw new UnsupportedOperationException(getContext().getString(R.string.uri_not_recognised, uri.toString()));
         }
 
         cursor.setNotificationUri(getContext().getContentResolver(), uri);
@@ -67,7 +69,7 @@ public class MovieProvider extends ContentProvider{
 
     @Nullable
     @Override
-    public Uri insert(@NonNull Uri uri, @Nullable ContentValues values) {
+    public Uri insert(@NonNull Uri uri, @Nullable ContentValues values){
         Uri newUri;
 
         switch(mUriMatcher.match(uri)){
@@ -81,7 +83,7 @@ public class MovieProvider extends ContentProvider{
                 newUri = ContentUris.withAppendedId(MovieContract.BASE_CONTENT_URI, id);
                 break;
             default:
-                throw new UnsupportedOperationException("Uri not recognised: " + uri);
+                throw new UnsupportedOperationException(getContext().getString(R.string.uri_not_recognised, uri.toString()));
         }
 
         getContext().getContentResolver().notifyChange(uri, null);
@@ -106,7 +108,7 @@ public class MovieProvider extends ContentProvider{
                                 selectionArgs);
                 break;
             default:
-                throw new UnsupportedOperationException("Uri not recognised: " + uri);
+                throw new UnsupportedOperationException(getContext().getString(R.string.uri_not_recognised, uri.toString()));
         }
 
         if(rowsDeleted > 0){

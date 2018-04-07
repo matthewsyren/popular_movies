@@ -24,36 +24,50 @@ import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import com.matthewsyren.popularmovies.Adapters.IRecyclerViewOnItemClickListener;
+import com.matthewsyren.popularmovies.Adapters.MoviePosterAdapter;
 import com.matthewsyren.popularmovies.Data.MovieContract;
 import com.matthewsyren.popularmovies.Data.MovieContract.MovieEntry;
 import com.matthewsyren.popularmovies.Models.MoviePoster;
-import com.matthewsyren.popularmovies.MoviePosterAdapter.RecyclerViewItemClickListener;
-import com.matthewsyren.popularmovies.Tasks.MovieImagesQueryTask;
-import com.matthewsyren.popularmovies.Tasks.MovieImagesQueryTaskOnCompleteListener;
+import com.matthewsyren.popularmovies.Tasks.IMoviePosterQueryTaskOnCompleteListener;
+import com.matthewsyren.popularmovies.Tasks.MoviePosterQueryTask;
 import com.matthewsyren.popularmovies.Utilities.BitmapUtilities;
 import com.matthewsyren.popularmovies.Utilities.JsonUtilities;
 import com.matthewsyren.popularmovies.Utilities.NetworkUtilities;
 
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class MainActivity extends AppCompatActivity implements RecyclerViewItemClickListener, MovieImagesQueryTaskOnCompleteListener, LoaderManager.LoaderCallbacks<Cursor>{
+public class MainActivity
+        extends AppCompatActivity
+        implements IRecyclerViewOnItemClickListener,
+        IMoviePosterQueryTaskOnCompleteListener,
+        LoaderManager.LoaderCallbacks<Cursor>{
+
+    //View bindings
     @BindView(R.id.rv_movie_posters) RecyclerView mRecyclerView;
     @BindView(R.id.pb_poster_loading) ProgressBar mProgressBar;
     @BindView(R.id.b_refresh) Button mRefresh;
+
+    //Variables and constants
     private int mCheckedItem = 0;
-    private static final String CHECKED_ITEM = "checked_item";
+    private static final String CHECKED_ITEM_BUNDLE_KEY = "checked_item";
     private static final int SORT_BY_POPULARITY_KEY = 0;
     private static final int SORT_BY_RATING_KEY = 1;
+    private static final int SORT_BY_FAVOURITES_KEY = 2;
     private static final int FAVOURITES_LOADER_ID = 100;
     private static final int FAVOURITES_NO_INTERNET_ID = 101;
+    private static final String MOVIE_POSTERS_BUNDLE_KEY = "bundle";
+    private ArrayList<MoviePoster> mMoviePosters;
+
+
     private static final String[] FAVOURITES_PROJECTION = {
             MovieEntry.COLUMN_MOVIE_DB_ID,
             MovieEntry.COLUMN_POSTER_URL};
+
     private static final String[] FAVOURITES_NO_INTERNET_PROJECTION = {
             MovieEntry.COLUMN_MOVIE_DB_ID,
             MovieEntry.COLUMN_POSTER};
@@ -64,21 +78,35 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewItemC
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
 
+        //Restores cached data
+        if(savedInstanceState != null){
+            restoreData(savedInstanceState);
+        }
+    }
+
+    //Restores the appropriate data
+    public void restoreData(Bundle savedInstanceState){
         //Restores the sorting method using savedInstanceState
-        if(savedInstanceState != null && savedInstanceState.containsKey(CHECKED_ITEM)){
-            mCheckedItem = savedInstanceState.getInt(CHECKED_ITEM);
+        if(savedInstanceState.containsKey(CHECKED_ITEM_BUNDLE_KEY)){
+            mCheckedItem = savedInstanceState.getInt(CHECKED_ITEM_BUNDLE_KEY);
         }
 
-        //Fetches movies sorted by the appropriate method
-        queryMovies(getSortingMethod());
+        if(savedInstanceState.containsKey(MOVIE_POSTERS_BUNDLE_KEY)){
+            mMoviePosters = savedInstanceState.getParcelableArrayList(MOVIE_POSTERS_BUNDLE_KEY);
+        }
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
+    protected void onStart() {
+        super.onStart();
 
-        //Fetches movies sorted by the appropriate method
-        queryMovies(getSortingMethod());
+        //Fetches movies sorted by the appropriate method, or displays the cached movie posters if there are any
+        if(mMoviePosters == null || (!NetworkUtilities.isOnline(this) && mCheckedItem == SORT_BY_FAVOURITES_KEY)){
+            queryMovies(getSortingMethod());
+        }
+        else{
+            displayMoviePosters(mMoviePosters, null);
+        }
     }
 
     //Returns the sorting method that the user has chosen
@@ -109,8 +137,8 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewItemC
             }
             else{
                 URL url = JsonUtilities.buildMoviePosterURL(this, sortBy);
-                MovieImagesQueryTask movieImagesQueryTask = new MovieImagesQueryTask(this, this);
-                movieImagesQueryTask.execute(url);
+                MoviePosterQueryTask moviePosterQueryTask = new MoviePosterQueryTask(this, this);
+                moviePosterQueryTask.execute(url);
             }
         }
         else{
@@ -162,9 +190,13 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewItemC
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
-        //Saves the sorting method that the user has chosen
-        outState.putInt(CHECKED_ITEM, mCheckedItem);
         super.onSaveInstanceState(outState);
+
+        outState.putInt(CHECKED_ITEM_BUNDLE_KEY, mCheckedItem);
+
+        if(mMoviePosters != null){
+            outState.putParcelableArrayList(MOVIE_POSTERS_BUNDLE_KEY, mMoviePosters);
+        }
     }
 
     /* Displays a Dialog which allows the user to choose what to sort the movies by
@@ -204,8 +236,10 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewItemC
         startActivity(intent);
     }
 
-    //Displays data if data is returned from the API, otherwise displays error message
-    public void displayMoviePosters(List<MoviePoster> moviePosters, List<Bitmap> bitmaps){
+    /* Displays data if data is returned from the API, otherwise displays error message
+     * The bitmaps ArrayList is used if there is no Internet connection. It contains the movie posters from the SQLite database in Bitmap form
+     */
+    public void displayMoviePosters(ArrayList<MoviePoster> moviePosters, ArrayList<Bitmap> bitmaps){
         if(moviePosters == null || moviePosters.size() == 0){
             Toast.makeText(getApplicationContext(), getResources().getString(R.string.no_movies_found_error), Toast.LENGTH_LONG).show();
         }
@@ -241,7 +275,8 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewItemC
     }
 
     @Override
-    public void onTaskComplete(List<MoviePoster> moviePosters) {
+    public void onMoviePosterQueryTaskComplete(ArrayList<MoviePoster> moviePosters) {
+        mMoviePosters = moviePosters;
         displayMoviePosters(moviePosters, null);
     }
 
@@ -275,7 +310,7 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewItemC
                         null
                 );
         }
-        throw new RuntimeException("Loader ID not recognised: " + id);
+        throw new RuntimeException(getString(R.string.loader_id_not_found, id));
     }
 
     @Override
@@ -286,9 +321,11 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewItemC
         switch(id){
             case FAVOURITES_LOADER_ID:
                 parseFavouritesCursor(cursor);
+                getSupportLoaderManager().destroyLoader(FAVOURITES_LOADER_ID);
                 break;
             case FAVOURITES_NO_INTERNET_ID:
                 parseFavouritesWithNoInternetCursor(cursor);
+                getSupportLoaderManager().destroyLoader(FAVOURITES_NO_INTERNET_ID);
                 break;
         }
     }
@@ -302,7 +339,7 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewItemC
      * This is used when there is an Internet connection, as the latest posters will then be able to be retrieved from the online API
      */
     public void parseFavouritesCursor(Cursor cursor){
-        //Converts the data to a List of MoviePoster objects and passes the List to a method to display them
+        //Converts the data to an ArrayList of MoviePoster objects and passes the ArrayList to a method to display them
         if(cursor != null){
             if(cursor.getCount() == 0){
                 mRecyclerView.setAdapter(null);
@@ -316,6 +353,7 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewItemC
                     moviePosters.add(new MoviePoster(movieId, moviePosterUrl));
                 }
                 if(moviePosters.size() > 0){
+                    mMoviePosters = moviePosters;
                     displayMoviePosters(moviePosters, null);
                 }
             }
@@ -343,6 +381,7 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewItemC
                     bitmaps.add(bitmap);
                 }
                 if(moviePosters.size() > 0){
+                    mMoviePosters = moviePosters;
                     displayMoviePosters(moviePosters, bitmaps);
                 }
             }

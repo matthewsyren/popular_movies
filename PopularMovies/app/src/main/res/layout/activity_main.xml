@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="com.matthewsyren.popularmovies.MainActivity"
-    android:layout_margin="@dimen/recycler_view_margin">
+    android:layout_margin="@dimen/main_activity_recycler_view_margin">
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/rv_movie_posters"

@@ -27,17 +27,31 @@
     <string name="movie_runtime">Runtime:\n%s minutes</string>
     <string name="movie_rating">Rating:\n%s/10</string>
     <string name="movie_release_date">Release Date:\n%s</string>
-    <string name="movie_overview">Overview:\n%s</string>
+    <string name="movie_overview">Overview:</string>
     <string name="movie_runtime_not_available">Runtime: \nN/A</string>
     <string name="movie_rating_not_available">Rating: \nN/A</string>
     <string name="movie">Movie</string>
-    <string name="image_favourite_description">This button will allow the user to add the movie to their favourites</string>
+    <string name="image_favourite_content_description">This button will allow the user to add the movie to their favourites</string>
     <string name="movie_added_to_favourites">Movie added to favourites</string>
     <string name="movie_removed_from_favourites">Movie removed from favourites</string>
     <string name="favourite_error_message">An error occurred, please try again</string>
+    <string name="image_play_trailer_content_description">This image displays a play icon for the trailer</string>
+    <string name="movie_trailers">Trailers:</string>
+    <string name="trailer_name">Trailer %d</string>
+    <string name="trailer_error">An error occurred, please ensure you have an app that can play Youtube videos</string>
+    <string name="reviews">Reviews:</string>
+    <string name="review_line">%s: \n%s\n\n</string>
+    <string name="share">Share</string>
+    <string name="movie_trailer_intent_chooser">How would you like to view this video?</string>
+    <string name="share_trailer">Share trailer</string>
+    <string name="no_trailers_to_share">No trailers found</string>
 
     <!-- Extras -->
-    <string name="EXTRA_MOVIE_ID">com.matthewsyren.popularmovies.extra.MOVIE_ID</string>
+    <string name="EXTRA_MOVIE_ID">movie_id</string>
+
+    <!-- Exceptions -->
+    <string name="loader_id_not_found">Loader ID not recognised (ID: %d)</string>
+    <string name="uri_not_recognised">URI not recognised (URI: %s)</string>
 
     <!-- API Key -->
     <string name="API_KEY">YOUR_API_KEY_HERE</string>
