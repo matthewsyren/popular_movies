@@ -1,4 +1,4 @@
-package com.matthewsyren.popularmovies.Data;
+package com.matthewsyren.popularmovies.data;
 
 import android.net.Uri;
 import android.provider.BaseColumns;
@@ -7,6 +7,7 @@ import android.provider.BaseColumns;
  * Used as the contract to define the structure of the SQLite database
  */
 
+@SuppressWarnings("WeakerAccess")
 public class MovieContract {
     public static final String CONTENT_AUTHORITY = "com.matthewsyren.popularmovies";
     public static final Uri BASE_CONTENT_URI = Uri.parse("content://" + CONTENT_AUTHORITY);

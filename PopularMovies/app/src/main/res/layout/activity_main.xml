@@ -28,4 +28,13 @@
         android:textColor="@color/colorWhite"
         android:visibility="gone"
         android:onClick="refreshOnClick"/>
+
+    <TextView
+        android:id="@+id/tv_no_favourites_added"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/no_favourites_added"
+        android:visibility="gone"
+        android:layout_centerInParent="true"
+        android:textColor="@color/colorBlack"/>
 </RelativeLayout>

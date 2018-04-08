@@ -1,4 +1,4 @@
-package com.matthewsyren.popularmovies.Data;
+package com.matthewsyren.popularmovies.data;
 
 import android.content.ContentProvider;
 import android.content.ContentUris;
@@ -8,7 +8,7 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import com.matthewsyren.popularmovies.Data.MovieContract.MovieEntry;
+import com.matthewsyren.popularmovies.data.MovieContract.MovieEntry;
 import com.matthewsyren.popularmovies.R;
 
 /**
@@ -17,12 +17,12 @@ import com.matthewsyren.popularmovies.R;
 
 public class MovieProvider
         extends ContentProvider{
-    private UriMatcher mUriMatcher = buildUriMatcher();
+    private final UriMatcher mUriMatcher = buildUriMatcher();
     private MovieDbHelper mMovieDbHelper;
     private static final int CODE_MOVIES = 100;
     private static final int CODE_MOVIE_WITH_ID = 101;
 
-    public static UriMatcher buildUriMatcher(){
+    private static UriMatcher buildUriMatcher(){
         UriMatcher uriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
         uriMatcher.addURI(MovieContract.CONTENT_AUTHORITY, MovieContract.PATH_MOVIES, CODE_MOVIES);
         uriMatcher.addURI(MovieContract.CONTENT_AUTHORITY, MovieContract.PATH_MOVIES + "/#", CODE_MOVIE_WITH_ID);
@@ -92,7 +92,7 @@ public class MovieProvider
 
     @Override
     public int delete(@NonNull Uri uri, @Nullable String selection, @Nullable String[] selectionArgs) {
-        int rowsDeleted = 0;
+        int rowsDeleted;
 
         //Allows the returning of the number of rows deleted if the selection passed in is null
         if(selection == null){

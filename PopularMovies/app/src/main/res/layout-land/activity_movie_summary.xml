@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <ImageView
+        android:id="@+id/iv_movie_poster"
+        android:contentDescription="@string/image_content_description"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:adjustViewBounds="true"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintRight_toLeftOf="@+id/guideline" />
+
+    <android.support.constraint.Guideline
+        android:id="@+id/guideline"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.25"/>
+
+    <TextView
+        android:id="@+id/tv_movie_runtime"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/iv_movie_poster"
+        style="@style/MovieInformation"
+        android:layout_marginTop="0dp"/>
+
+    <TextView
+        android:id="@+id/tv_movie_rating"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/tv_movie_runtime"
+        app:layout_constraintStart_toEndOf="@+id/iv_movie_poster"
+        style="@style/MovieInformation"/>
+
+    <TextView
+        android:id="@+id/tv_movie_release_date"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@+id/tv_movie_rating"
+        app:layout_constraintStart_toEndOf="@+id/iv_movie_poster"
+        style="@style/MovieInformation"/>
+
+    <ImageButton
+        android:id="@+id/ib_favourite"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:contentDescription="@string/image_favourite_content_description"
+        app:layout_constraintTop_toBottomOf="@id/tv_movie_release_date"
+        app:layout_constraintLeft_toLeftOf="@+id/tv_movie_release_date"
+        android:src="@drawable/ic_favorite_white_24dp"
+        android:background="@color/colorAccent"
+        android:onClick="favouriteOnClick"
+        android:padding="@dimen/favourite_button_padding"
+        android:layout_marginTop="@dimen/movie_activity_view_margin_top"
+        android:visibility="gone"/>
+</android.support.constraint.ConstraintLayout>

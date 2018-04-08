@@ -1,16 +1,16 @@
-package com.matthewsyren.popularmovies.Data;
+package com.matthewsyren.popularmovies.data;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
-import com.matthewsyren.popularmovies.Data.MovieContract.MovieEntry;
+import com.matthewsyren.popularmovies.data.MovieContract.MovieEntry;
 
 /**
  * Used to create and update the SQLite database
  */
 
-public class MovieDbHelper
+class MovieDbHelper
         extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "movies.db";
     private static final int DATABASE_VERSION = 1;

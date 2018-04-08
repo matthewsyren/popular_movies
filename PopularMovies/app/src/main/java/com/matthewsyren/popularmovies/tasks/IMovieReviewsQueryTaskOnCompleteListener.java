@@ -1,6 +1,6 @@
-package com.matthewsyren.popularmovies.Tasks;
+package com.matthewsyren.popularmovies.tasks;
 
-import com.matthewsyren.popularmovies.Models.MovieReview;
+import com.matthewsyren.popularmovies.models.MovieReview;
 
 import java.util.ArrayList;
 

@@ -1,4 +1,4 @@
-package com.matthewsyren.popularmovies.Utilities;
+package com.matthewsyren.popularmovies.utilities;
 
 import android.content.Context;
 import android.net.ConnectivityManager;

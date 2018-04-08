@@ -1,4 +1,4 @@
-package com.matthewsyren.popularmovies.Models;
+package com.matthewsyren.popularmovies.models;
 
 import android.os.Parcel;
 import android.os.Parcelable;

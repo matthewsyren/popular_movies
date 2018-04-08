@@ -8,6 +8,7 @@
     <dimen name="main_activity_recycler_view_margin">5dp</dimen>
 
     <!-- MovieActivity -->
+    <dimen name="movie_title_text_size">30sp</dimen>
     <dimen name="movie_details_text_size">22sp</dimen>
     <dimen name="favourite_button_padding">6dp</dimen>
     <dimen name="movie_activity_view_margin_top">20dp</dimen>

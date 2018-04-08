@@ -1,4 +1,4 @@
-package com.matthewsyren.popularmovies.Adapters;
+package com.matthewsyren.popularmovies.adapters;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -9,7 +9,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 
-import com.matthewsyren.popularmovies.Models.MoviePoster;
+import com.matthewsyren.popularmovies.models.MoviePoster;
 import com.matthewsyren.popularmovies.R;
 import com.squareup.picasso.Picasso;
 
@@ -52,6 +52,8 @@ public class MoviePosterAdapter
         if(mMoviePosters.get(position).getPosterURL() != null){
             Picasso.with(holder.moviePoster.getContext())
                     .load(mMoviePosters.get(position).getPosterURL())
+                    .placeholder(R.color.colorGrey)
+                    .error(R.color.colorGrey)
                     .fit()
                     .centerInside()
                     .into(holder.moviePoster);

@@ -1,12 +1,13 @@
-package com.matthewsyren.popularmovies.Tasks;
+package com.matthewsyren.popularmovies.tasks;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.widget.Toast;
 
 import com.matthewsyren.popularmovies.R;
-import com.matthewsyren.popularmovies.Utilities.JsonUtilities;
-import com.matthewsyren.popularmovies.Utilities.NetworkUtilities;
+import com.matthewsyren.popularmovies.utilities.JsonUtilities;
+import com.matthewsyren.popularmovies.utilities.NetworkUtilities;
 
 import java.io.IOException;
 import java.net.URL;
@@ -16,14 +17,15 @@ import java.util.ArrayList;
  * Used to fetch a list of URLs pointing to the trailers for a specific movie
  */
 
+@SuppressLint("StaticFieldLeak")
 public class MovieTrailersQueryTask
         extends AsyncTask<URL, Void, ArrayList<URL>>{
-    private Context mContext;
-    private IMovieTrailersQueryTaskOnCompleteListener mMovieTrailersQueryTask;
+    private final Context mContext;
+    private final IMovieTrailersQueryTaskOnCompleteListener mMovieTrailersQueryTaskOnCompleteListener;
 
     public MovieTrailersQueryTask(Context context, IMovieTrailersQueryTaskOnCompleteListener movieTrailersQueryTask){
         mContext = context;
-        mMovieTrailersQueryTask = movieTrailersQueryTask;
+        mMovieTrailersQueryTaskOnCompleteListener = movieTrailersQueryTask;
     }
 
     @Override
@@ -46,6 +48,6 @@ public class MovieTrailersQueryTask
     @Override
     protected void onPostExecute(ArrayList<URL> trailers) {
         super.onPostExecute(trailers);
-        mMovieTrailersQueryTask.onMovieTrailerQueryTaskComplete(trailers);
+        mMovieTrailersQueryTaskOnCompleteListener.onMovieTrailerQueryTaskComplete(trailers);
     }
 }

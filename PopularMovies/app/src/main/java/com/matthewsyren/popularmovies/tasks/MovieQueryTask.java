@@ -1,13 +1,14 @@
-package com.matthewsyren.popularmovies.Tasks;
+package com.matthewsyren.popularmovies.tasks;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.widget.Toast;
 
-import com.matthewsyren.popularmovies.Models.Movie;
+import com.matthewsyren.popularmovies.models.Movie;
 import com.matthewsyren.popularmovies.R;
-import com.matthewsyren.popularmovies.Utilities.JsonUtilities;
-import com.matthewsyren.popularmovies.Utilities.NetworkUtilities;
+import com.matthewsyren.popularmovies.utilities.JsonUtilities;
+import com.matthewsyren.popularmovies.utilities.NetworkUtilities;
 
 import java.io.IOException;
 import java.net.URL;
@@ -16,10 +17,11 @@ import java.net.URL;
  * Used to query the movie information
  */
 
+@SuppressLint("StaticFieldLeak")
 public class MovieQueryTask
         extends AsyncTask<URL, Void, Movie> {
-    private Context mContext;
-    private IMovieQueryTaskOnCompleteListener mMovieQueryTaskOnCompleteListener;
+    private final Context mContext;
+    private final IMovieQueryTaskOnCompleteListener mMovieQueryTaskOnCompleteListener;
 
     public MovieQueryTask(Context context, IMovieQueryTaskOnCompleteListener movieQueryTaskOnCompleteListener){
         mContext = context;

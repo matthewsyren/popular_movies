@@ -22,18 +22,19 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
-import com.matthewsyren.popularmovies.Adapters.IRecyclerViewOnItemClickListener;
-import com.matthewsyren.popularmovies.Adapters.MoviePosterAdapter;
-import com.matthewsyren.popularmovies.Data.MovieContract;
-import com.matthewsyren.popularmovies.Data.MovieContract.MovieEntry;
-import com.matthewsyren.popularmovies.Models.MoviePoster;
-import com.matthewsyren.popularmovies.Tasks.IMoviePosterQueryTaskOnCompleteListener;
-import com.matthewsyren.popularmovies.Tasks.MoviePosterQueryTask;
-import com.matthewsyren.popularmovies.Utilities.BitmapUtilities;
-import com.matthewsyren.popularmovies.Utilities.JsonUtilities;
-import com.matthewsyren.popularmovies.Utilities.NetworkUtilities;
+import com.matthewsyren.popularmovies.adapters.IRecyclerViewOnItemClickListener;
+import com.matthewsyren.popularmovies.adapters.MoviePosterAdapter;
+import com.matthewsyren.popularmovies.data.MovieContract;
+import com.matthewsyren.popularmovies.data.MovieContract.MovieEntry;
+import com.matthewsyren.popularmovies.models.MoviePoster;
+import com.matthewsyren.popularmovies.tasks.IMoviePosterQueryTaskOnCompleteListener;
+import com.matthewsyren.popularmovies.tasks.MoviePosterQueryTask;
+import com.matthewsyren.popularmovies.utilities.BitmapUtilities;
+import com.matthewsyren.popularmovies.utilities.JsonUtilities;
+import com.matthewsyren.popularmovies.utilities.NetworkUtilities;
 
 import java.net.URL;
 import java.util.ArrayList;
@@ -51,6 +52,7 @@ public class MainActivity
     @BindView(R.id.rv_movie_posters) RecyclerView mRecyclerView;
     @BindView(R.id.pb_poster_loading) ProgressBar mProgressBar;
     @BindView(R.id.b_refresh) Button mRefresh;
+    @BindView(R.id.tv_no_favourites_added) TextView mNoFavouritesAdded;
 
     //Variables and constants
     private int mCheckedItem = 0;
@@ -59,10 +61,9 @@ public class MainActivity
     private static final int SORT_BY_RATING_KEY = 1;
     private static final int SORT_BY_FAVOURITES_KEY = 2;
     private static final int FAVOURITES_LOADER_ID = 100;
-    private static final int FAVOURITES_NO_INTERNET_ID = 101;
+    private static final int FAVOURITES_NO_INTERNET_LOADER_ID = 101;
     private static final String MOVIE_POSTERS_BUNDLE_KEY = "bundle";
     private ArrayList<MoviePoster> mMoviePosters;
-
 
     private static final String[] FAVOURITES_PROJECTION = {
             MovieEntry.COLUMN_MOVIE_DB_ID,
@@ -85,7 +86,7 @@ public class MainActivity
     }
 
     //Restores the appropriate data
-    public void restoreData(Bundle savedInstanceState){
+    private void restoreData(Bundle savedInstanceState){
         //Restores the sorting method using savedInstanceState
         if(savedInstanceState.containsKey(CHECKED_ITEM_BUNDLE_KEY)){
             mCheckedItem = savedInstanceState.getInt(CHECKED_ITEM_BUNDLE_KEY);
@@ -101,7 +102,7 @@ public class MainActivity
         super.onStart();
 
         //Fetches movies sorted by the appropriate method, or displays the cached movie posters if there are any
-        if(mMoviePosters == null || (!NetworkUtilities.isOnline(this) && mCheckedItem == SORT_BY_FAVOURITES_KEY)){
+        if(mMoviePosters == null || mCheckedItem == SORT_BY_FAVOURITES_KEY){
             queryMovies(getSortingMethod());
         }
         else{
@@ -109,8 +110,14 @@ public class MainActivity
         }
     }
 
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        restoreData(savedInstanceState);
+    }
+
     //Returns the sorting method that the user has chosen
-    public String getSortingMethod(){
+    private String getSortingMethod(){
         String sortBy;
         if(mCheckedItem == SORT_BY_POPULARITY_KEY){
             sortBy = JsonUtilities.SORT_BY_POPULARITY;
@@ -126,6 +133,8 @@ public class MainActivity
 
     //Used to execute the AsyncTask that will fetch the data for the movies in the appropriate sort order (if there is a connection to the Internet)
     private void queryMovies(String sortBy){
+        mNoFavouritesAdded.setVisibility(View.GONE);
+
         if(NetworkUtilities.isOnline(this)) {
             mRecyclerView.setAdapter(null);
             hideRefreshButton();
@@ -144,7 +153,7 @@ public class MainActivity
         else{
             if(getSortingMethod().equals(JsonUtilities.SORT_BY_FAVOURITES)) {
                 //Starts the Loader that will be used to fetch the user's favourite movies when there is no Internet connection
-                getSupportLoaderManager().restartLoader(FAVOURITES_NO_INTERNET_ID, null, this);
+                getSupportLoaderManager().restartLoader(FAVOURITES_NO_INTERNET_LOADER_ID, null, this);
             }
             else{
                 displayRefreshButton();
@@ -153,7 +162,7 @@ public class MainActivity
     }
 
     //Displays a button that allows the user to refresh the data
-    public void displayRefreshButton(){
+    private void displayRefreshButton(){
         mRecyclerView.setAdapter(null);
         Toast.makeText(getApplicationContext(), getResources().getString(R.string.connection_error), Toast.LENGTH_LONG).show();
         mProgressBar.setVisibility(View.INVISIBLE);
@@ -161,7 +170,7 @@ public class MainActivity
     }
 
     //Hides the button that allows the user to refresh the data
-    public void hideRefreshButton(){
+    private void hideRefreshButton(){
         mProgressBar.setVisibility(View.INVISIBLE);
         mRefresh.setVisibility(View.INVISIBLE);
     }
@@ -239,7 +248,7 @@ public class MainActivity
     /* Displays data if data is returned from the API, otherwise displays error message
      * The bitmaps ArrayList is used if there is no Internet connection. It contains the movie posters from the SQLite database in Bitmap form
      */
-    public void displayMoviePosters(ArrayList<MoviePoster> moviePosters, ArrayList<Bitmap> bitmaps){
+    private void displayMoviePosters(ArrayList<MoviePoster> moviePosters, ArrayList<Bitmap> bitmaps){
         if(moviePosters == null || moviePosters.size() == 0){
             Toast.makeText(getApplicationContext(), getResources().getString(R.string.no_movies_found_error), Toast.LENGTH_LONG).show();
         }
@@ -300,7 +309,7 @@ public class MainActivity
                     null,
                     null
                 );
-            case FAVOURITES_NO_INTERNET_ID:
+            case FAVOURITES_NO_INTERNET_LOADER_ID:
                 return new CursorLoader(
                         this,
                         uri,
@@ -323,9 +332,9 @@ public class MainActivity
                 parseFavouritesCursor(cursor);
                 getSupportLoaderManager().destroyLoader(FAVOURITES_LOADER_ID);
                 break;
-            case FAVOURITES_NO_INTERNET_ID:
+            case FAVOURITES_NO_INTERNET_LOADER_ID:
                 parseFavouritesWithNoInternetCursor(cursor);
-                getSupportLoaderManager().destroyLoader(FAVOURITES_NO_INTERNET_ID);
+                getSupportLoaderManager().destroyLoader(FAVOURITES_NO_INTERNET_LOADER_ID);
                 break;
         }
     }
@@ -338,12 +347,12 @@ public class MainActivity
     /* Parses the Cursor and fetches the movie posters from the URLs retrieved from the database
      * This is used when there is an Internet connection, as the latest posters will then be able to be retrieved from the online API
      */
-    public void parseFavouritesCursor(Cursor cursor){
+    private void parseFavouritesCursor(Cursor cursor){
         //Converts the data to an ArrayList of MoviePoster objects and passes the ArrayList to a method to display them
         if(cursor != null){
             if(cursor.getCount() == 0){
                 mRecyclerView.setAdapter(null);
-                Toast.makeText(getApplicationContext(), getString(R.string.no_favourites_added), Toast.LENGTH_LONG).show();
+                mNoFavouritesAdded.setVisibility(View.VISIBLE);
             }
             else{
                 ArrayList<MoviePoster> moviePosters = new ArrayList<>();
@@ -364,14 +373,14 @@ public class MainActivity
     /* Parses the Cursor and displays the posters retrieved from the database
      * This is used when there is no Internet connection, as the posters can't be retrieved from the online API without an Internet connection
      */
-    public void parseFavouritesWithNoInternetCursor(Cursor cursor){
+    private void parseFavouritesWithNoInternetCursor(Cursor cursor){
         ArrayList<Bitmap> bitmaps = new ArrayList<>();
         ArrayList<MoviePoster> moviePosters = new ArrayList<>();
 
         if(cursor != null){
             if(cursor.getCount() == 0){
                 mRecyclerView.setAdapter(null);
-                Toast.makeText(getApplicationContext(), getString(R.string.no_favourites_added), Toast.LENGTH_LONG).show();
+                mNoFavouritesAdded.setVisibility(View.VISIBLE);
             }
             else{
                 while(cursor.moveToNext()) {

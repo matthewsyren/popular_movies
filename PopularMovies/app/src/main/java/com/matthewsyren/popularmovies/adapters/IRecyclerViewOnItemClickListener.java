@@ -1,4 +1,4 @@
-package com.matthewsyren.popularmovies.Adapters;
+package com.matthewsyren.popularmovies.adapters;
 
 /**
  * Used to handle clicks on RecyclerViews

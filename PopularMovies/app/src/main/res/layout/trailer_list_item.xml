@@ -7,7 +7,8 @@
     android:layout_margin="@dimen/trailer_card_margin">
         <android.support.constraint.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:background="@drawable/list_item_selector">
                 <ImageView
                     android:id="@+id/iv_play_trailer"
                     android:layout_width="@dimen/play_trailer_image_size"

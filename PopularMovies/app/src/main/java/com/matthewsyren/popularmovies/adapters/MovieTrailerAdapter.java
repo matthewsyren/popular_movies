@@ -1,4 +1,4 @@
-package com.matthewsyren.popularmovies.Adapters;
+package com.matthewsyren.popularmovies.adapters;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
@@ -22,7 +22,7 @@ import butterknife.ButterKnife;
 
 public class MovieTrailerAdapter
         extends RecyclerView.Adapter<MovieTrailerAdapter.TrailerViewHolder>{
-    private List<URL> mTrailerUrls;
+    private final List<URL> mTrailerUrls;
     private final IRecyclerViewOnItemClickListener mItemClickListener;
 
     public MovieTrailerAdapter(List<URL> trailerUrls, IRecyclerViewOnItemClickListener itemClickListener){

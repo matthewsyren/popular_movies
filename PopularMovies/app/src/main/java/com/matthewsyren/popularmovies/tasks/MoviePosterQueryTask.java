@@ -1,13 +1,14 @@
-package com.matthewsyren.popularmovies.Tasks;
+package com.matthewsyren.popularmovies.tasks;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.widget.Toast;
 
-import com.matthewsyren.popularmovies.Models.MoviePoster;
+import com.matthewsyren.popularmovies.models.MoviePoster;
 import com.matthewsyren.popularmovies.R;
-import com.matthewsyren.popularmovies.Utilities.JsonUtilities;
-import com.matthewsyren.popularmovies.Utilities.NetworkUtilities;
+import com.matthewsyren.popularmovies.utilities.JsonUtilities;
+import com.matthewsyren.popularmovies.utilities.NetworkUtilities;
 
 import java.io.IOException;
 import java.net.URL;
@@ -17,10 +18,11 @@ import java.util.ArrayList;
  * Used to query the movie posters for the appropriate movies
  */
 
+@SuppressLint("StaticFieldLeak")
 public class MoviePosterQueryTask
         extends AsyncTask<URL, Void, ArrayList<MoviePoster>> {
-    private Context mContext;
-    private IMoviePosterQueryTaskOnCompleteListener mMoviePosterQueryTaskOnCompleteListener;
+    private final Context mContext;
+    private final IMoviePosterQueryTaskOnCompleteListener mMoviePosterQueryTaskOnCompleteListener;
 
     public MoviePosterQueryTask(Context context, IMoviePosterQueryTaskOnCompleteListener moviePosterQueryTaskOnCompleteListener){
         mContext = context;

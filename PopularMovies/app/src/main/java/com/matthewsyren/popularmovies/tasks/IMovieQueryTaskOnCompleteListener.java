@@ -1,6 +1,6 @@
-package com.matthewsyren.popularmovies.Tasks;
+package com.matthewsyren.popularmovies.tasks;
 
-import com.matthewsyren.popularmovies.Models.Movie;
+import com.matthewsyren.popularmovies.models.Movie;
 
 /**
  * Used to provide a callback for the MovieQueryTask AsyncTask

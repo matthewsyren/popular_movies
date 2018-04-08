@@ -1,11 +1,11 @@
-package com.matthewsyren.popularmovies.Utilities;
+package com.matthewsyren.popularmovies.utilities;
 
 import android.content.Context;
 import android.net.Uri;
 
-import com.matthewsyren.popularmovies.Models.Movie;
-import com.matthewsyren.popularmovies.Models.MoviePoster;
-import com.matthewsyren.popularmovies.Models.MovieReview;
+import com.matthewsyren.popularmovies.models.Movie;
+import com.matthewsyren.popularmovies.models.MoviePoster;
+import com.matthewsyren.popularmovies.models.MovieReview;
 import com.matthewsyren.popularmovies.R;
 
 import org.json.JSONArray;
@@ -21,18 +21,18 @@ import java.util.ArrayList;
  */
 
 public class JsonUtilities {
-    //Constants
+    //URL constants
     private static final String MOVIE_DB_BASE_URL = "http://api.themoviedb.org/3/movie";
     private static final String INDIVIDUAL_MOVIE_DB_BASE_URL = "http://api.themoviedb.org/3/movie/";
+    private static final String MOVIE_POSTER_BASE_URL = "http://image.tmdb.org/t/p/w185/";
+    private static final String YOUTUBE_VIDEO_BASE_URL = "https://www.youtube.com/watch";
     private static final String QUERY_PARAMETER_API_KEY = "api_key";
+    private static final String QUERY_PARAMETER_TRAILER_KEY = "v";
     public static final String SORT_BY_POPULARITY = "popular";
     public static final String SORT_BY_RATING = "top_rated";
     public static final String SORT_BY_FAVOURITES = "favourites";
     private static final String PATH_VIDEO = "videos";
     private static final String PATH_REVIEWS = "reviews";
-    private static final String YOUTUBE_VIDEO_BASE_URL = "https://www.youtube.com/watch";
-    private static final String QUERY_PARAMETER_TRAILER_KEY = "v";
-    private static final String MOVIE_POSTER_BASE_URL = "http://image.tmdb.org/t/p/w185/";
 
     //Creates a URL that can be used to fetch either the most popular or highest rated movies
     public static URL buildMoviePosterURL(Context context, String sortBy){

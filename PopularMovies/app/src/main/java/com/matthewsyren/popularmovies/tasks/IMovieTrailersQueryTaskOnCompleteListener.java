@@ -1,4 +1,4 @@
-package com.matthewsyren.popularmovies.Tasks;
+package com.matthewsyren.popularmovies.tasks;
 
 import java.net.URL;
 import java.util.ArrayList;

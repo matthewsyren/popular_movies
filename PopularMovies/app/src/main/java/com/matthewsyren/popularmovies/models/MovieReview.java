@@ -1,4 +1,4 @@
-package com.matthewsyren.popularmovies.Models;
+package com.matthewsyren.popularmovies.models;
 
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -9,8 +9,8 @@ import android.os.Parcelable;
 
 public class MovieReview
         implements Parcelable{
-    private String author;
-    private String content;
+    private final String author;
+    private final String content;
 
     public MovieReview(String author, String content) {
         this.author = author;
